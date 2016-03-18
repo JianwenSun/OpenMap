@@ -1,0 +1,30 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+					xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"				
+					xmlns:system="clr-namespace:System;assembly=mscorlib"
+                    xmlns:omap="clr-namespace:OpenMap"                                                                
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">
+
+
+    <Style x:Key="MouseControlStyle" TargetType="omap:MouseControl">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="omap:MouseControl">
+                    <Canvas Background="Transparent">
+                        <Rectangle x:Name="PART_PixelBox"
+								   Fill="#3E1157DC" 
+								   Stroke="#FF0781F7" 
+								   StrokeDashArray="20 8" 
+								   StrokeEndLineCap="Round" 
+								   StrokeDashCap="Round" 
+								   StrokeThickness="1.5" 
+								   RadiusY="8" RadiusX="8"/>
+                    </Canvas>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Implicit Styles for WPF -->
+    <Style TargetType="omap:MouseControl" BasedOn="{StaticResource MouseControlStyle}" />
+
+</ResourceDictionary>

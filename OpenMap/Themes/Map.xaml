@@ -1,0 +1,39 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+					xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"				
+					xmlns:system="clr-namespace:System;assembly=mscorlib"
+                    xmlns:maps="clr-namespace:OpenMap"                                                                
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">
+
+
+    <Style x:Key="MapStyle" TargetType="maps:Map">
+
+        <Setter Property="OperationSyncer">
+            <Setter.Value>
+                <maps:OperationSyncer/>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="maps:Map">
+                    <Grid x:Name="PART_LayoutRoot">
+                        <ItemsPresenter />
+                        <maps:MouseControl x:Name="PART_MouseControl"/>
+                        <maps:MultiScaleImage x:Name="PART_MultiScaleImage"/>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="ItemsPanel">
+			<Setter.Value>
+				<ItemsPanelTemplate>
+					<Grid />
+				</ItemsPanelTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
+
+	<!-- Implicit Styles for WPF and SL -->
+	<Style TargetType="maps:Map" BasedOn="{StaticResource MapStyle}" />
+
+
+</ResourceDictionary>
