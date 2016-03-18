@@ -14,10 +14,12 @@ namespace OpenMap
         private const string MouseControlPartName = "PART_MouseControl";
         private const string MultiScaleImagePartName = "PART_MultiScaleImage";
 
+        #region DependencyProperty
+
         /// <summary>
-		/// Identifies the <see cref="Provider"/> Provider dependency property.
-		/// </summary>
-		public static readonly DependencyProperty ProviderProperty = DependencyProperty.Register(
+        /// Identifies the <see cref="Provider"/> Provider dependency property.
+        /// </summary>
+        public static readonly DependencyProperty ProviderProperty = DependencyProperty.Register(
             "Provider",
             typeof(MapProviderBase),
             typeof(Map),
@@ -59,7 +61,9 @@ namespace OpenMap
             typeof(Map),
             new PropertyMetadata(new Location(), CenterChangedHandler, CenterCoerced));
 
-
+        /// <summary>
+        /// Sync with the mouse operation between mousecontrol map and multiscale image.
+        /// </summary>
         public static readonly DependencyProperty OperationSyncerProperty = DependencyProperty.Register(
             "OperationSyncer",
             typeof(OperationSyncer),
@@ -76,9 +80,30 @@ namespace OpenMap
             new PropertyMetadata(MouseWheelBehavior.ZoomToPoint));
 
         /// <summary>
-		/// Gets or sets zoom level.
+		/// Identifies the <see cref="MouseShiftDragMode"/> dependency property.
 		/// </summary>
-		public int ZoomLevel
+		public static readonly DependencyProperty MouseShiftDragModeProperty = DependencyProperty.Register(
+            "MouseShiftDragMode",
+            typeof(MouseDragBehavior),
+            typeof(Map),
+            new PropertyMetadata(MouseDragBehavior.Select));
+
+        /// <summary>
+		/// Identifies the <see cref="MouseDragMode"/> dependency property.
+		/// </summary>
+		public static readonly DependencyProperty MouseDragModeProperty = DependencyProperty.Register(
+            "MouseDragMode",
+            typeof(MouseDragBehavior),
+            typeof(Map),
+            new PropertyMetadata(MouseDragBehavior.Drag));
+
+        #endregion
+
+        #region Property
+        /// <summary>
+        /// Gets or sets zoom level.
+        /// </summary>
+        public int ZoomLevel
         {
             get
             {
@@ -147,7 +172,7 @@ namespace OpenMap
                 return (OperationSyncer)this.GetValue(OperationSyncerProperty);
             }
 
-            set
+            internal set
             {
                 this.SetValue(OperationSyncerProperty, value);
             }
@@ -185,6 +210,38 @@ namespace OpenMap
             }
         }
 
+        /// <summary>
+		/// Gets or sets value which specify mouse dragging behaviour when SHIFT key is pressed.
+		/// </summary>
+		public MouseDragBehavior MouseShiftDragMode
+        {
+            get
+            {
+                return (MouseDragBehavior)this.GetValue(MouseShiftDragModeProperty);
+            }
+
+            set
+            {
+                this.SetValue(MouseShiftDragModeProperty, value);
+            }
+        }
+
+        /// <summary>
+		/// Gets or sets Mouse Drag Mode property.
+		/// </summary>
+		public MouseDragBehavior MouseDragMode
+        {
+            get
+            {
+                return (MouseDragBehavior)this.GetValue(MouseDragModeProperty);
+            }
+
+            set
+            {
+                this.SetValue(MouseDragModeProperty, value);
+            }
+        }
+
         public ISpatialReference SpatialReference
         {
             get
@@ -201,25 +258,23 @@ namespace OpenMap
                 this.spatialReference = value;
             }
         }
-
         public bool IsInitializeCompleletd { get; set; }
 
+        #endregion
+
+        #region Event
+        
         /// <summary>
-		/// Event occurs when initialization of the map control is completed.
-		/// </summary>
-		public event EventHandler InitializeCompleted;
+        /// Event occurs when initialization of the map control is completed.
+        /// </summary>
+        public event EventHandler InitializeCompleted;
 
-        internal MouseControl MouseControl
-        {
-            get;
-            set;
-        }
+        #endregion
 
-        internal MultiScaleImage MultiScaleImage
-        {
-            get;
-            set;
-        }
+        #region InternelProperty
+
+        internal MouseControl MouseControl { get; set; }
+        internal MultiScaleImage MultiScaleImage { get; set; }
 
         /// <summary>
 		/// Gets or sets the Logical (0->1) top left of the Map.
@@ -233,15 +288,20 @@ namespace OpenMap
             set
             {
                 Point origin = value;
+                double width = this.viewportPixelWidth;
+                origin = new Point(Math.Round(origin.X * width) / width, Math.Round(origin.Y * width) / width);
                 this.MultiScaleImage.ViewportOrigin = origin;
                 this.logicalOrigin = origin;
             }
         }
-
         internal double viewportPixelWidth;
         internal double viewportWidth;
-        private Point logicalOrigin;
 
+        #endregion
+
+        #region PrivateProperty
+
+        Point logicalOrigin;
         ISpatialReference spatialReference;
         bool spatialReferenceInitialized;
         bool templateInitialized;
@@ -249,12 +309,14 @@ namespace OpenMap
         /// <summary>
 		/// Total pixel size of the earth surface per zoom level.
 		/// </summary>
-		private Size[] sufaceTotalSize = null;
+		Size[] sufaceTotalSize = null;
+
+        #endregion
 
         /// <summary>
-		/// Initializes static members of the RadMap class.
-		/// </summary>
-		[Description("Static class initializer.")]
+        /// Initializes static members of the RadMap class.
+        /// </summary>
+        [Description("Static class initializer.")]
         static Map()
         {
             DefaultStyleKeyProperty.OverrideMetadata(typeof(Map), new FrameworkPropertyMetadata(typeof(Map)));
@@ -262,19 +324,8 @@ namespace OpenMap
 
         public Map()
         {
+            this.OperationSyncer = new OperationSyncer();
             this.SizeChanged += Map_SizeChanged;
-            this.Loaded += Map_Loaded;
-        }
-
-        private void Map_Loaded(object sender, RoutedEventArgs e)
-        {
-            if (this.OperationSyncer != null && !this.OperationSyncer.Syncing)
-                this.OperationSyncer.Start(this);
-        }
-
-        private void Map_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            this.SetZoom(this.ZoomLevel);
         }
 
         public override void OnApplyTemplate()
@@ -286,75 +337,26 @@ namespace OpenMap
             this.Initialize();
         }
 
+        #region Internel
+
         internal void SetZoom(int zoomLevel)
         {
             ViewportHelper.SetZoomLevel(this, zoomLevel);
         }
 
-        internal void ZoomToPoint(Point point, int zoomAdjustment)
+        internal void SetZoomToPoint(Point point, int zoomAdjustment)
         {
-            ICoordinateService coordinateService = CoordinateServiceProvider.GetService(this);
-            Point center = this.SpatialReference.GeographicToLogical(this.Center);
-            Location newCenter = this.Center;
-            IMapSource mode = this.Provider.CurrentSource;
-            Point sourceLogical = coordinateService.PixelToLogical(point);
-            Location sourcePoint = coordinateService.PixelToGeographic(point);
-            this.ZoomLevel += zoomAdjustment;
-            Point currentLogical = coordinateService.PixelToLogical(point);
-            Location currentPoint = coordinateService.PixelToGeographic(point);
-
-            if (mode == this.Provider.CurrentSource)
-            {
-                Point shift = new Point(sourceLogical.X - currentLogical.X, sourceLogical.Y - currentLogical.Y);
-                center.X += shift.X;
-                center.Y += shift.Y;
-
-                newCenter = this.SpatialReference.LogicalToGeographic(center);
-            }
-            else
-            {
-                if (this.Center.Longitude < sourcePoint.Longitude)
-                    newCenter.Longitude = this.Center.Longitude + sourcePoint.Longitude - currentPoint.Longitude;
-                else
-                    newCenter.Longitude = this.Center.Longitude - currentPoint.Longitude + sourcePoint.Longitude;
-
-                if (this.Center.Latitude < sourcePoint.Latitude)
-                    newCenter.Latitude = this.Center.Latitude + sourcePoint.Latitude - currentPoint.Latitude;
-                else
-                    newCenter.Latitude = this.Center.Latitude - currentPoint.Latitude + sourcePoint.Latitude;
-            }
-
-            this.Center = newCenter;
+            ViewportHelper.SetZoomToPoint(this, point, zoomAdjustment);
         }
 
-        internal bool OnMouseWheel(double delta, Point point)
+        internal void SetDrag(Point point, Point origin, Location lastMapCenter)
         {
-            if (this.MouseWheelMode != MouseWheelBehavior.None)
-            {
-                delta = (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift ? -delta : delta;
-                int zoomAdjustment = (int)Math.Round(delta);
-
-                this.ChangeZoomOnMouseWheel(zoomAdjustment, point);
-
-                return true;
-            }
-
-            return false;
+            ViewportHelper.SetDrag(this, point, origin, lastMapCenter);
         }
 
-        internal void ChangeZoomOnMouseWheel(int delta, Point point)
+        internal bool SetMouseWheel(double delta, Point point)
         {
-            if (this.MouseWheelMode != MouseWheelBehavior.None)
-            {
-                if (this.MouseWheelMode == MouseWheelBehavior.ZoomToPoint)
-                {
-                    this.ZoomToPoint(point, delta);
-                }
-                else
-                {
-                    this.ZoomLevel += delta;
-                }
-            }
+            return ViewportHelper.SetMouseWheel(this, delta, point);
         }
 
         internal void Initialize()
@@ -372,6 +374,9 @@ namespace OpenMap
                 }
             }
 
+            if (!this.OperationSyncer.Syncing)
+                this.OperationSyncer.Start(this);
+
             if (this.spatialReferenceInitialized)
             {
                 this.IsInitializeCompleletd = true;
@@ -379,8 +384,14 @@ namespace OpenMap
             }
 
             if(this.IsInitializeCompleletd)
+            {
                 this.SetZoom(this.ZoomLevel);
+            }
         }
+
+        #endregion
+
+        #region Protect
 
         protected override Size ArrangeOverride(Size arrangeBounds)
         {
@@ -395,6 +406,37 @@ namespace OpenMap
 
             return base.ArrangeOverride(arrangeBounds);
         }
+
+        protected virtual void OnSpatialReferenceChanged(ISpatialReference OldSpatialReference, ISpatialReference newSpatialReference)
+        {
+            if (newSpatialReference != null)
+            {
+                this.SpatialReference = this.Provider.SpatialReference;
+                this.spatialReferenceInitialized = true;
+                this.sufaceTotalSize = new Size[this.MaxZoomLevel];
+                for (int zoomLevel = 1; zoomLevel <= this.MaxZoomLevel; zoomLevel++)
+                {
+                    // Canvas size
+                    // map width = map height = tileSize * 2^level pixels
+                    Size totalSize = new Size()
+                    {
+                        Width = this.Provider.TileSize.Width * Math.Pow(2, zoomLevel),
+                        Height = this.Provider.TileSize.Width * Math.Pow(2, zoomLevel)
+                    };
+
+                    this.sufaceTotalSize[zoomLevel - 1] = totalSize;
+                }
+
+                this.Initialize();
+            }
+            else
+            {
+                this.SpatialReference = null;
+                this.spatialReferenceInitialized = false;
+            }
+        }
+
+        #endregion
 
         #region private
 
@@ -463,24 +505,24 @@ namespace OpenMap
         private static void OnOperationSyncerPropertyChanged(DependencyObject source, DependencyPropertyChangedEventArgs eventArgs)
         {
             Map map = source as Map;
-            if (map != null)
+            if (map != null && map.IsInitializeCompleletd)
             {
                 OperationSyncer oldValue = eventArgs.OldValue as OperationSyncer;
                 if (oldValue != null)
                     oldValue.Stop();
 
                 OperationSyncer newValue = eventArgs.NewValue as OperationSyncer;
-
                 if (newValue != null)
                     newValue.Start(map);
             }
         }
 
-        #endregion
+        private void Map_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            this.SetZoom(this.ZoomLevel);
+        }
 
-        #region internel
-
-        internal object CoerceZoomLevelProperty(object value)
+        private object CoerceZoomLevelProperty(object value)
         {
             int zoomLevel = (int)this.GetValidatedZoomLevel((int)value);
             return zoomLevel;
@@ -488,7 +530,12 @@ namespace OpenMap
 
         private void OnCenterChanged(Location oldCenter, Location newCenter)
         {
-            ViewportHelper.UpdateLogicalOrigin(this, newCenter);
+            ViewportHelper.SetLogicalOrigin(this, newCenter);
+        }
+
+        private void NewProvider_SpatialReferenceChanged(object sender, SpatialReferenceEventArgs e)
+        {
+            this.OnSpatialReferenceChanged(e.OldValue, e.NewValue);
         }
 
         private double GetValidatedZoomLevel(double zoomLevel)
@@ -502,40 +549,6 @@ namespace OpenMap
                 return this.MaxZoomLevel;
             }
             return zoomLevel;
-        }
-
-        private void NewProvider_SpatialReferenceChanged(object sender, SpatialReferenceEventArgs e)
-        {
-            this.OnSpatialReferenceChanged(e.OldValue, e.NewValue);
-        }
-
-        protected virtual void OnSpatialReferenceChanged(ISpatialReference OldSpatialReference, ISpatialReference newSpatialReference)
-        {
-            if(newSpatialReference != null)
-            {
-                this.SpatialReference = this.Provider.SpatialReference;
-                this.spatialReferenceInitialized = true;
-                this.sufaceTotalSize = new Size[this.MaxZoomLevel];
-                for (int zoomLevel = 1; zoomLevel <= this.MaxZoomLevel; zoomLevel++)
-                {
-                    // Canvas size
-                    // map width = map height = tileSize * 2^level pixels
-                    Size totalSize = new Size()
-                    {
-                        Width = this.Provider.TileSize.Width * Math.Pow(2, zoomLevel),
-                        Height = this.Provider.TileSize.Width * Math.Pow(2, zoomLevel)
-                    };
-
-                    this.sufaceTotalSize[zoomLevel - 1] = totalSize;
-                }
-
-                this.Initialize();
-            }
-            else
-            {
-                this.SpatialReference = null;
-                this.spatialReferenceInitialized = false;
-            }
         }
 
         private void OnInitializeCompleted(EventArgs args)

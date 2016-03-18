@@ -6,7 +6,6 @@
 
 
     <Style x:Key="MapStyle" TargetType="maps:Map">
-
         <Setter Property="OperationSyncer">
             <Setter.Value>
                 <maps:OperationSyncer/>

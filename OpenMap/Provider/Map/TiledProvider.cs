@@ -181,7 +181,7 @@ namespace OpenMap
 					profile += "\\";
 				}
 
-                this.CacheStorage = null; //new FileSystemCache(profile + "TelerikMapCache\\" + this.GetType().Name);
+                this.CacheStorage = new FileSystemCache(profile + "OpenMapCache\\" + this.GetType().Name);
 			}
 		}
 

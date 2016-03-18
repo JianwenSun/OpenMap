@@ -11,17 +11,13 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <opm:Map Grid.Row="0" Grid.Column="1">
+        <opm:Map Grid.Column="1">
             <opm:Map.Provider>
                 <opm:GoogleMapProvider/>
             </opm:Map.Provider>
         </opm:Map>
 
-        <opm:Map Grid.Row="0" Grid.Column="0">
+        <opm:Map Grid.Column="0">
             <opm:Map.Provider>
                 <opm:OpenStreetMapProvider Layer="Standard"/>
             </opm:Map.Provider>

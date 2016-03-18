@@ -218,8 +218,8 @@ namespace OpenMap
             }
 
             this.webClient = new WebClient();
+            this.webClient.Headers.Add("user-agent", "sunjianwen");
             this.webClient.CachePolicy = new RequestCachePolicy(this.requestCacheLevel);
-
             this.usedCredentials = null;
             if (this.requestCredentials != null)
             {

@@ -8,15 +8,21 @@ namespace OpenMap
 {
     public static class CoordinateServiceProvider
     {
-        private static CoordinateService coordinateService = null;
+        private static Dictionary<Map, ICoordinateService> coordinateServices = new Dictionary<Map, ICoordinateService>();
 
         public static ICoordinateService GetService(Map map)
         {
-            if (coordinateService != null && coordinateService.Map == map)
+            ICoordinateService coordinateService = null;
+            if(coordinateServices.TryGetValue(map, out coordinateService))
+            {
                 return coordinateService;
-
-            coordinateService = new CoordinateService(map);
-            return coordinateService;
+            }
+            else
+            {
+                coordinateService = new CoordinateService(map);
+                coordinateServices.Add(map, coordinateService);
+                return coordinateService;
+            }
         }
     }
 }

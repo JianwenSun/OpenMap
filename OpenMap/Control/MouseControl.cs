@@ -237,6 +237,7 @@ namespace OpenMap
                 this.Height = 200;
                 this.selectedBox.Width = 200;
                 this.selectedBox.Height = 200;
+                this.selectedBox.Visibility = Visibility.Collapsed;
             }
             else
             {
@@ -343,13 +344,13 @@ namespace OpenMap
 
                 if (this.isMouseDrag && !this.lastDragPoint.EqualPoints(point))
                 { 
-                    this.RaiseEvent(new MouseDragedRoutedEventArgs(MouseDragedEvent, this.lastDragPoint, point));
+                    this.RaiseEvent(new MouseDragedRoutedEventArgs(MouseDragedEvent, this.mouseDownOrigin, point));
                     this.lastDragPoint = point;
                 }
 
                 if(this.isSelectMode)
                 {
-                    this.SelectBoxLocation = new Point(Math.Min(mouseDownOrigin.X, point.X), Math.Min(mouseDownOrigin.Y, point.Y));
+                    this.SelectBoxLocation = new Point(Math.Min(this.mouseDownOrigin.X, point.X), Math.Min(this.mouseDownOrigin.Y, point.Y));
                     this.SelectBoxSize = new Size(Math.Abs(this.mouseDownOrigin.X - point.X), Math.Abs(this.mouseDownOrigin.Y - point.Y));
                 }
             }

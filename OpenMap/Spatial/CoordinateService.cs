@@ -36,7 +36,7 @@ namespace OpenMap
 
         public Point LogicalToPixel(Point logical)
         {
-            double scaleFactor = this.Map.ActualWidth;
+            double scaleFactor = this.Map.MultiScaleImage.ActualWidth;
             Point logicalOrigin = this.Map.MultiScaleImage.ViewportOrigin;
             double viewLogicalWidth = this.Map.MultiScaleImage.ViewportWidth;
 
@@ -52,6 +52,10 @@ namespace OpenMap
 
         public Point PixelToLogical(Point pixel)
         {
+            Point origin = this.Map.MultiScaleImage.ViewportOrigin;
+            double width = this.Map.MultiScaleImage.ActualWidth;
+            origin = new Point(Math.Round(origin.X * width) / width, Math.Round(origin.Y * width) / width);
+
             Point offset = this.Map.LogicalOrigin;
 
             Size viewLogicalSize = new Size(this.Map.viewportWidth,

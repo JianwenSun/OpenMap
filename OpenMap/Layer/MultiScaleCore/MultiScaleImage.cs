@@ -11,44 +11,57 @@ using System.Windows.Threading;
 
 namespace OpenMap
 {
+    /// <summary>
+    /// WPF counterpart for the Silverlight MultiScaleImage class.
+    /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Multi")]
     public class MultiScaleImage : Canvas
     {
         /// <summary>
-		/// Identifies the UseSprings dependency property.
-		/// </summary>
-		public static readonly DependencyProperty UseSpringsProperty = DependencyProperty.Register(
+        /// Identifies the UseSprings dependency property.
+        /// </summary>
+        public static readonly DependencyProperty UseSpringsProperty = DependencyProperty.Register(
             "UseSprings",
             typeof(bool),
             typeof(MultiScaleImage),
             new PropertyMetadata(true));
 
         /// <summary>
-		/// Identifies the <see cref="SpringAnimationsMode"/> dependency property.
-		/// </summary>
-		public static readonly DependencyProperty SpringAnimationsModeProperty = DependencyProperty.Register("SpringAnimationsMode",
+        /// Identifies the <see cref="SpringAnimationsMode"/> dependency property.
+        /// </summary>
+        public static readonly DependencyProperty SpringAnimationsModeProperty = DependencyProperty.Register("SpringAnimationsMode",
             typeof(SpringAnimationsMode),
             typeof(MultiScaleImage),
             new PropertyMetadata(SpringAnimationsMode.All));
 
         /// <summary>
-		/// Identifies the MotionFinished routed event.
-		/// </summary>
-		public static readonly RoutedEvent MotionFinishedEvent = EventManager.RegisterRoutedEvent(
+        /// Identifies the MotionFinished routed event.
+        /// </summary>
+        public static readonly RoutedEvent MotionFinishedEvent = EventManager.RegisterRoutedEvent(
             "MotionFinished",
             RoutingStrategy.Bubble,
             typeof(RoutedEventHandler),
             typeof(MultiScaleImage));
 
         /// <summary>
-		/// Spring animation duration in seconds.
-		/// </summary>
-		private const double ZoomingAnimationDuration = 0.6d;
-        private const double PanningAnimationDuration = 0.4d;
+        /// Identifies the ViewportChanged routed event.
+        /// </summary>
+        public static readonly RoutedEvent ViewportChangedEvent = EventManager.RegisterRoutedEvent(
+            "ViewportChanged",
+            RoutingStrategy.Direct,
+            typeof(RoutedEventHandler),
+            typeof(MultiScaleImage));
+
+        /// <summary>
+        /// Spring animation duration in seconds.
+        /// </summary>
+        private const double ZoomingAnimationDuration = 0.4d;
+        private const double PanningAnimationDuration = 0.2d;
         private const double FollowForce = 0.95;
         private const double DragValue = 0.78;
         private const double ArrangeTilesInterval = 150;
 
-        // <summary>
+        /// <summary>
         /// Identifies the InternalViewportWidth dependency property.
         /// </summary>
         private static readonly DependencyProperty InternalViewportWidthProperty = DependencyProperty.Register(
@@ -114,17 +127,17 @@ namespace OpenMap
         private HashSet<TileSource> unusedTiles;
 
         /// <summary>
-		/// Initializes static members of the MultiScaleImage class.
-		/// </summary>
-		static MultiScaleImage()
+        /// Initializes static members of the MultiScaleImage class.
+        /// </summary>
+        static MultiScaleImage()
         {
             MaxDownloadersCount = 16;
         }
 
         /// <summary>
-		/// Initializes a new instance of the MultiScaleImage class.
-		/// </summary>
-		public MultiScaleImage()
+        /// Initializes a new instance of the MultiScaleImage class.
+        /// </summary>
+        public MultiScaleImage()
         {
             this.ClipToBounds = true;
             this.SnapsToDevicePixels = true;
@@ -149,10 +162,17 @@ namespace OpenMap
             this.CreateSplineKeyFrame();
         }
 
+        private delegate bool ValidateDelegate(TileDownloader downloader);
+
         /// <summary>
-		/// Occurs when zoom or pan animation ends.
-		/// </summary>
-		public event RoutedEventHandler MotionFinished
+        /// Occurs when opening of image succeeded.
+        /// </summary>
+        public event RoutedEventHandler ImageOpenSucceeded;
+
+        /// <summary>
+        /// Occurs when zoom or pan animation ends.
+        /// </summary>
+        public event RoutedEventHandler MotionFinished
         {
             add
             {
@@ -165,18 +185,33 @@ namespace OpenMap
         }
 
         /// <summary>
-		/// Maximum tile downloaders count.
-		/// </summary>
-		public static int MaxDownloadersCount
+        /// Occurs when the viewport is changed.
+        /// </summary>
+        public event RoutedEventHandler ViewportChanged
+        {
+            add
+            {
+                this.AddHandler(ViewportChangedEvent, value);
+            }
+            remove
+            {
+                this.RemoveHandler(ViewportChangedEvent, value);
+            }
+        }
+
+        /// <summary>
+        /// Maximum tile downloaders count.
+        /// </summary>
+        public static int MaxDownloadersCount
         {
             get;
             set;
         }
 
         /// <summary>
-		/// Gets or sets the viewport origin.
-		/// </summary>
-		public Point ViewportOrigin
+        /// Gets or sets the viewport origin.
+        /// </summary>
+        public Point ViewportOrigin
         {
             get
             {
@@ -243,9 +278,9 @@ namespace OpenMap
         }
 
         /// <summary>
-		/// Gets or sets the tile source.
-		/// </summary>
-		public MultiScaleTileSource Source
+        /// Gets or sets the tile source.
+        /// </summary>
+        public MultiScaleTileSource Source
         {
             get
             {
@@ -297,8 +332,16 @@ namespace OpenMap
         internal void SetViewportOrigin()
         {
             this.ArrangeImage();
+
+            var eventArgs = new RoutedEventArgs(ViewportChangedEvent);
+            this.RaiseEvent(eventArgs);
         }
 
+        /// <summary>
+        /// Called to arrange and size the content.
+        /// </summary>
+        /// <param name="arrangeSize">The computed size that is used to arrange the content.</param>
+        /// <returns>The calculated size.</returns>
         protected override Size ArrangeOverride(Size arrangeSize)
         {
             Size size = base.ArrangeOverride(arrangeSize);
@@ -323,6 +366,17 @@ namespace OpenMap
             {
                 image.SetViewportOrigin();
             }
+        }
+
+        private static bool EqualPoints(Point pointA, Point pointB)
+        {
+            return Math.Round(pointA.X, 15) == Math.Round(pointB.X, 15)
+                && Math.Round(pointA.Y, 15) == Math.Round(pointB.Y, 15);
+        }
+
+        private static bool EqualDoubles(double a, double b)
+        {
+            return Math.Round(a, 15) == Math.Round(b, 15);
         }
 
         private void OnSourceChanged(MultiScaleTileSource oldValue, MultiScaleTileSource newValue)
@@ -383,7 +437,7 @@ namespace OpenMap
             this.imageLeft = -internalViewportOrigin.X * ratio;
             this.imageTop = -internalViewportOrigin.Y * ratio;
 
-            if (this.viewportOrigin.EqualPoints(internalViewportOrigin) && this.viewportWidth.EqualDoubles(internalViewportWidth))
+            if (EqualPoints(internalViewportOrigin, this.viewportOrigin) && EqualDoubles(internalViewportWidth, this.viewportWidth))
             {
                 this.imageLeft = Math.Round(this.imageLeft);
                 this.imageTop = Math.Round(this.imageTop);
@@ -663,6 +717,11 @@ namespace OpenMap
         {
             this.unloaded = false;
 
+            if (this.ImageOpenSucceeded != null)
+            {
+                this.ImageOpenSucceeded(this, new RoutedEventArgs());
+            }
+
             if (this.arrangeTimer == null)
             {
                 this.arrangeInvalidated = true;
@@ -713,10 +772,12 @@ namespace OpenMap
 
             this.animatorVieportWidth = (double)this.GetValue(InternalViewportWidthProperty);
             this.animatorVieportOrigin = (Point)this.GetValue(InternalViewportOriginProperty);
+
+            System.Console.WriteLine("RenderingAnimation   " + this.animatorVieportOrigin);
             this.frameInterval = this.frameInterval < 0 ? 0 : this.frameInterval;
 
-            this.zoomAnimation = !this.animatorVieportWidth.EqualDoubles(targetWidth);
-            if (this.zoomAnimation || !this.animatorVieportOrigin.EqualPoints(targetOrigin) || !this.animationStarted)
+            this.zoomAnimation = !EqualDoubles(this.animatorVieportWidth, targetWidth);
+            if (this.zoomAnimation || !EqualPoints(this.animatorVieportOrigin, targetOrigin) || !this.animationStarted)
             {
                 if (!this.animationStarted)
                 {
@@ -854,7 +915,7 @@ namespace OpenMap
             double x = this.startViewportOrigin.X + ((targetOrigin.X - this.startViewportOrigin.X) * animationValue);
             double y = this.startViewportOrigin.Y + ((targetOrigin.Y - this.startViewportOrigin.Y) * animationValue);
             Point newOrigin = new Point(x, y);
-            if (newOrigin.EqualPoints(targetOrigin))
+            if (EqualPoints(newOrigin, targetOrigin))
             {
                 newOrigin = targetOrigin;
             }
@@ -862,7 +923,7 @@ namespace OpenMap
             if (this.zoomAnimation)
             {
                 double newWidth = this.startViewportWidth + ((targetWidth - this.startViewportWidth) * animationValue);
-                if (newWidth.EqualDoubles(targetWidth))
+                if (EqualDoubles(newWidth, targetWidth))
                 {
                     newWidth = targetWidth;
                 }

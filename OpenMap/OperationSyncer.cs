@@ -11,15 +11,9 @@ namespace OpenMap
     public class OperationSyncer
     {
         public Map Map { get; set; }
-
         public bool Syncing { get; set; }
 
-        public OperationSyncer() { }
-       
-        public OperationSyncer(Map map)
-        {
-            this.Map = map;
-        }
+        internal Location MapCenter { get; set; }
 
         public void Start(Map map)
         {
@@ -32,6 +26,7 @@ namespace OpenMap
             this.Map.AddHandler(MouseControl.MouseClickEvent, new MouseClickRoutedEventHandler(this.OnClick));
             this.Map.AddHandler(MouseControl.MouseSelectedEvent, new MouseSelectedRoutedEventHandler(this.OnSelected));
             this.Map.AddHandler(MouseControl.MouseWheelEvent, new MouseWheelRoutedEventHandler(this.OnWheel));
+            this.Map.MouseControl.PreviewMouseLeftButtonDown += MouseControl_PreviewMouseLeftButtonDown;
         }
 
         public void Stop()
@@ -42,7 +37,13 @@ namespace OpenMap
             this.Map.RemoveHandler(MouseControl.MouseClickEvent, new MouseClickRoutedEventHandler(this.OnClick));
             this.Map.RemoveHandler(MouseControl.MouseSelectedEvent, new MouseSelectedRoutedEventHandler(this.OnSelected));
             this.Map.RemoveHandler(MouseControl.MouseWheelEvent, new MouseWheelRoutedEventHandler(this.OnWheel));
+            this.Map.MouseControl.PreviewMouseLeftButtonDown -= MouseControl_PreviewMouseLeftButtonDown;
             this.Syncing = false;
+        }
+
+        private void MouseControl_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            this.MapCenter = this.Map.Center;
         }
 
         private void OnDragStarted(object sender, MouseDragStartedRoutedEventArgs e)
@@ -52,7 +53,7 @@ namespace OpenMap
 
         private void OnDraged(object sender, MouseDragedRoutedEventArgs e)
         {
-            System.Console.WriteLine("Draged");
+            this.Map.SetDrag(e.Target, e.Origin, this.MapCenter);
         }
 
         private void OnClick(object sender, MouseClickRoutedEventArgs e)
@@ -66,7 +67,7 @@ namespace OpenMap
 
         private void OnWheel(object sender, MouseWheelRoutedEventArgs e)
         {
-            this.Map.OnMouseWheel(e.Delta, e.Origin);
+            this.Map.SetMouseWheel(e.Delta, e.Origin);
             System.Console.WriteLine("Wheel");
         }
     }
