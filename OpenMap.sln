@@ -1,0 +1,48 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMap", "OpenMap\OpenMap.csproj", "{B56D7EA0-0BDD-4079-B3AA-2478FA8471AB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OpenMap.Sample", "OpenMap.Sample\OpenMap.Sample.csproj", "{511621E1-4DAE-4768-984E-C433D50FF02A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|ARM = Debug|ARM
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|ARM = Release|ARM
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B56D7EA0-0BDD-4079-B3AA-2478FA8471AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B56D7EA0-0BDD-4079-B3AA-2478FA8471AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B56D7EA0-0BDD-4079-B3AA-2478FA8471AB}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{B56D7EA0-0BDD-4079-B3AA-2478FA8471AB}.Debug|ARM.Build.0 = Debug|Any CPU
+		{B56D7EA0-0BDD-4079-B3AA-2478FA8471AB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B56D7EA0-0BDD-4079-B3AA-2478FA8471AB}.Debug|x86.Build.0 = Debug|Any CPU
+		{B56D7EA0-0BDD-4079-B3AA-2478FA8471AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B56D7EA0-0BDD-4079-B3AA-2478FA8471AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B56D7EA0-0BDD-4079-B3AA-2478FA8471AB}.Release|ARM.ActiveCfg = Release|Any CPU
+		{B56D7EA0-0BDD-4079-B3AA-2478FA8471AB}.Release|ARM.Build.0 = Release|Any CPU
+		{B56D7EA0-0BDD-4079-B3AA-2478FA8471AB}.Release|x86.ActiveCfg = Release|Any CPU
+		{B56D7EA0-0BDD-4079-B3AA-2478FA8471AB}.Release|x86.Build.0 = Release|Any CPU
+		{511621E1-4DAE-4768-984E-C433D50FF02A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{511621E1-4DAE-4768-984E-C433D50FF02A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{511621E1-4DAE-4768-984E-C433D50FF02A}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{511621E1-4DAE-4768-984E-C433D50FF02A}.Debug|ARM.Build.0 = Debug|Any CPU
+		{511621E1-4DAE-4768-984E-C433D50FF02A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{511621E1-4DAE-4768-984E-C433D50FF02A}.Debug|x86.Build.0 = Debug|Any CPU
+		{511621E1-4DAE-4768-984E-C433D50FF02A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{511621E1-4DAE-4768-984E-C433D50FF02A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{511621E1-4DAE-4768-984E-C433D50FF02A}.Release|ARM.ActiveCfg = Release|Any CPU
+		{511621E1-4DAE-4768-984E-C433D50FF02A}.Release|ARM.Build.0 = Release|Any CPU
+		{511621E1-4DAE-4768-984E-C433D50FF02A}.Release|x86.ActiveCfg = Release|Any CPU
+		{511621E1-4DAE-4768-984E-C433D50FF02A}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

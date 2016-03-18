@@ -1,0 +1,30 @@
+﻿<Window x:Class="OpenMap.Sample.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:opm="http://schemas.openmap.com/2008/xaml/presentation"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="600" Width="1200">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <opm:Map Grid.Row="0" Grid.Column="1">
+            <opm:Map.Provider>
+                <opm:GoogleMapProvider/>
+            </opm:Map.Provider>
+        </opm:Map>
+
+        <opm:Map Grid.Row="0" Grid.Column="0">
+            <opm:Map.Provider>
+                <opm:OpenStreetMapProvider Layer="Standard"/>
+            </opm:Map.Provider>
+        </opm:Map>
+    </Grid>
+</Window>
